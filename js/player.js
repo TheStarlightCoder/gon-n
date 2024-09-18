@@ -542,6 +542,8 @@ const m = {
             m.maxHealth *= 0.5
         }
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
+        document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - m.defense())) + "px";
+
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
@@ -551,8 +553,8 @@ const m = {
     lastCalculatedDamage: 0, //used to decided if damage bar needs to be redrawn  (in simulation.checks)
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
     defense() {
-        if (level.noDefenseSetting === 2) return 1 //zero defense constraint
         let dmg = 1
+        if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.3
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.15
@@ -794,7 +796,7 @@ const m = {
                         color: "rgba(0,255,100,0.5)",
                         time: 10
                     });
-                    mob[i].health += dmg * 10
+                    mob[i].health += dmg * 7
                     if (mob[i].health > 1) mob[i].health = 1
                 }
             }
@@ -985,6 +987,121 @@ const m = {
                 powerUps.boost.draw()
             }
         },
+        egg() {
+            m.isAltSkin = true
+            m.yOffWhen.stand = 52
+            m.yOffWhen.jump = 72
+            m.coyoteCycles = 11
+            m.hardLandCDScale = 0.5
+            m.hardLanding = 160
+            m.squirrelFx = 1.4;
+            m.squirrelJump = 1.16;
+            m.setMovement()
+
+            m.draw = function () {
+                if (powerUps.boost.endCycle > simulation.cycle) {
+                    //gel that acts as if the wind is blowing it when player moves
+                    ctx.save();
+                    ctx.translate(m.pos.x, m.pos.y);
+                    m.velocitySmooth = Vector.add(Vector.mult(m.velocitySmooth, 0.8), Vector.mult(player.velocity, 0.2))
+                    ctx.rotate(Math.atan2(m.velocitySmooth.y, m.velocitySmooth.x))
+                    ctx.beginPath();
+                    const radius = 39
+                    const mag = 14 * Vector.magnitude(m.velocitySmooth) + radius
+                    ctx.arc(0, 0, radius, -Math.PI / 2, Math.PI / 2);
+                    ctx.bezierCurveTo(-radius, radius, -radius, 0, -mag, 0); // bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+                    ctx.bezierCurveTo(-radius, 0, -radius, -radius, 0, -radius);
+
+                    // const time = (powerUps.boost.endCycle - m.cycle) / powerUps.boost.duration
+                    const time = Math.min(0.5, (powerUps.boost.endCycle - simulation.cycle) / powerUps.boost.duration)
+
+                    ctx.fillStyle = `rgba(0,0,0,${0.04 + 0.3 * time})`
+                    ctx.fill()
+                    // ctx.strokeStyle = "#333"
+                    // ctx.lineWidth = 1
+                    // ctx.stroke();
+                    ctx.restore();
+                }
+
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -1.25);
+                m.drawLeg("#606060");
+                m.calcLeg(0, 0);
+                m.drawLeg("#444");
+
+                ctx.rotate(m.angle);
+                ctx.beginPath();
+                // ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.ellipse(0, 0, 0.9 * 31, 1.05 * 31, 0, 0, 2 * Math.PI);
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.ellipse(15, 0, 0.8 * 4, 1.1 * 4, 0, 0, 2 * Math.PI);
+
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+                m.yOff = m.yOff * 0.75 + m.yOffGoal * 0.25; //smoothly move leg height towards height goal
+            }
+            m.drawLeg = function (stroke) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                const hip = { x: m.hip.x - 5, y: m.hip.y + 5 }
+                const sub = Vector.sub(m.knee, hip)
+                const off = Vector.mult(Vector.rotate(Vector.normalise(sub), Math.PI / 2), 8)
+                const kneeBraceHigh = Vector.add(hip, off)
+                const kneeBraceLow = Vector.add(kneeBraceHigh, Vector.mult(sub, 0.9))
+                const foot = { x: m.foot.x - 10, y: m.foot.y - 15 }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(hip.x, hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(foot.x, foot.y);
+                //extra upper leg brace
+                ctx.moveTo(kneeBraceHigh.x, kneeBraceHigh.y);
+                ctx.lineTo(kneeBraceLow.x, kneeBraceLow.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                //foot
+                ctx.beginPath();
+                ctx.moveTo(foot.x, foot.y);
+                ctx.quadraticCurveTo(m.foot.x - 30, m.foot.y + 12, m.foot.x + 13, m.foot.y + 3);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y - 2, 11, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 3, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 3, 0, 2 * Math.PI);
+                //knee brace
+                // ctx.moveTo(kneeBraceHigh.x + 4, kneeBraceHigh.y);
+                // ctx.arc(kneeBraceHigh.x, kneeBraceHigh.y, 4, 0, 2 * Math.PI);
+                ctx.moveTo(kneeBraceLow.x + 2.5, kneeBraceLow.y);
+                ctx.arc(kneeBraceLow.x, kneeBraceLow.y, 2.5, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(foot.x + 2.5, foot.y);
+                ctx.arc(foot.x, foot.y, 2.5, 0, 2 * Math.PI);
+                ctx.fillStyle = "#f6f6f6"//m.fillColor;
+                ctx.fill();
+                ctx.lineWidth = 1;
+                // ctx.strokeStyle = "#333"
+                ctx.stroke();
+                ctx.restore();
+            }
+        },
         mech() {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
@@ -1029,6 +1146,7 @@ const m = {
                 m.drawLeg("#606060");
                 m.calcLeg(0, 0);
                 m.drawLeg("#444");
+
                 ctx.rotate(m.angle);
                 ctx.beginPath();
                 ctx.arc(0, 0, 30, 0, 2 * Math.PI);
@@ -2509,11 +2627,11 @@ const m = {
         }
     },
     regenEnergy() { //used in drawRegenEnergy  // rewritten by some tech
-        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
         if (m.energy < 0) m.energy = 0
     },
     regenEnergyDefault() {
-        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
         if (m.energy < 0) m.energy = 0
     },
     lookingAt(who) {
@@ -2696,7 +2814,7 @@ const m = {
                 if (tech.isTokamak && m.throwCharge > 4) { //remove the block body and pulse  in the direction you are facing
                     //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
-                    if (m.immuneCycle < m.cycle) m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge)
+                    if (m.immuneCycle < m.cycle) m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge) * level.isReducedRegen
                     m.throwCharge = 0;
                     m.definePlayerMass() //return to normal player mass
                     //remove block before pulse, so it doesn't get in the way
@@ -3051,7 +3169,7 @@ const m = {
                 m.pushMass(mob[i]);
 
                 if (tech.deflectEnergy && !mob[i].isInvulnerable && !mob[i].isShielded) {
-                    m.energy += tech.deflectEnergy
+                    m.energy += tech.deflectEnergy * level.isReducedRegen
                 }
             }
         }
@@ -5049,7 +5167,7 @@ const m = {
                                             Matter.Composite.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
-                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling
+                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (tech.isWormholeWorms) { //pandimensional spermia
                                                 b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                 Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
@@ -5071,10 +5189,8 @@ const m = {
                                         Matter.Composite.remove(engine.world, body[i]);
                                         body.splice(i, 1);
                                         m.fieldRange *= 0.8
-                                        // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                        // if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.5
-                                        if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling
-                                        if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling
+                                        if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
+                                        if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                         if (tech.isWormholeWorms) { //pandimensional spermia
                                             b.worm(Vector.add(m.hole.pos1, Vector.rotate({
                                                 x: m.fieldRange * 0.4,
@@ -5825,7 +5941,7 @@ const m = {
                                         return
                                     }
                                     m.damage(dmg);
-                                    if (tech.isPiezo) m.energy += 20.48;
+                                    if (tech.isPiezo) m.energy += 20.48 * level.isReducedRegen;
                                     if (tech.isStimulatedEmission) powerUps.ejectTech()
                                     if (mob[k].onHit) mob[k].onHit();
                                     if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles

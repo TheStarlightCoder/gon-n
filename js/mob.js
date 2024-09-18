@@ -30,6 +30,20 @@ const mobs = {
             // }
         }
     },
+    defaultHealthBar() {
+        for (let i = 0, len = mob.length; i < len; i++) {
+            if (mob[i].seePlayer.recall && mob[i].showHealthBar) {
+                const h = mob[i].radius * 0.3;
+                const w = mob[i].radius * 2;
+                const x = mob[i].position.x - w / 2;
+                const y = mob[i].position.y - w * 0.7;
+                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = "rgba(255,0,0,0.7)";
+                ctx.fillRect(x, y, w * mob[i].health, h);
+            }
+        }
+    },
     healthBar() {
         for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].seePlayer.recall && mob[i].showHealthBar) {
@@ -1010,8 +1024,9 @@ const mobs = {
                     this.death(); //death with no power up
                 }
             },
-            healthBar() { //draw health by mob //most health bars are drawn in mobs.healthbar();
-                if (this.seePlayer.recall) {
+            //draw health by mob //most health bars are drawn in mobs.healthBar(); , not this
+            healthBar() {
+                if (this.seePlayer.recall && !level.isHideHealth) {
                     const h = this.radius * 0.3;
                     const w = this.radius * 2;
                     const x = this.position.x - w / 2;
@@ -1085,7 +1100,7 @@ const mobs = {
                         if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
                         dmg *= this.damageReduction
                         //energy and heal drain should be calculated after damage boosts
-                        if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
+                        if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
                         dmg /= Math.sqrt(this.mass)
                     }
 
@@ -1142,9 +1157,10 @@ const mobs = {
                 if (this.isDropPowerUp) {
                     if (level.isMobDeathHeal) {
                         for (let i = 0; i < mob.length; i++) {
-                            if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 1000000 && mob[i].alive) { //1000
+                            if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 && mob[i].alive) { //700
                                 if (mob[i].health < 1) {
-                                    mob[i].health = 1
+                                    mob[i].health += 0.33 + this.isBoss
+                                    if (mob[i].health > 1) mob[i].health = 1
                                     simulation.drawList.push({
                                         x: mob[i].position.x,
                                         y: mob[i].position.y,
@@ -1303,9 +1319,6 @@ const mobs = {
                     if (tech.cloakDuplication && !this.isBoss) {
                         tech.cloakDuplication -= 0.01
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-                    }
-                    if (level.noDefenseSetting && this.isBoss) {
-                        level.noDefenseSetting = 2
                     }
                 } else if (tech.isShieldAmmo && this.shield && this.shieldCount === 1) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"

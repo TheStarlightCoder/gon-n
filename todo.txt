@@ -1,54 +1,21 @@
 ******************************************************** NEXT PATCH **************************************************
 
-difficulty
-  difficulty level 6 adds flat damage and damage taken
-  bonus tech no longer spawns on level 2 and 3 on difficulty level 6
-  at the end of subway you get 1 tech, but not on difficulty level 6
-  difficulty level 3 and 5 add a random constraint that changes each level
-constraints are effects that only last until the level ends
-  50% JUNK chance
-  4x shielded mob chance
-  power ups are sent to next level
-  +33% chance for mobs to respawn
-  -1 choice
-  2x ammo costs
-  duplication is set to zero
-  50% max energy
-  50% max health
-  bots follow slow
-  full damage taken after boss dies
-  0.1x damage after a power up
-  mob death heals mobs
-  mobs heal for your lost health
-  periodically spawn WIMPs
- 
-exciton damage boost power up has a chance to spawn without the tech (~3%/mob)
-  damage boost has a unique gel/hair aura for each skin
-  damage boost timer no longer ticks with time dilation field
-JUNK tech: stationary - thrown blocks can't move, but they still have momentum
-added a classic n-gon link for the previous patch in settings
-  but images are disabled to save space
-on levels where you can fall endlessly, power ups will also fall endlessly
-  they no longer teleport to the exit, sorry
+subway
+  2 new subway stations
+  more visible button graphics on subway
 
-Newton's 1st and 2nd laws are field tech, and they give twice the effect
-abelian group 4->3x damage while invulnerable
-bot fabrication price increases after 5->4 bots
-wikipedia 4->3 research per correct quiz
-upgraded sound bots fire fewer waves but do more damage per wave
-  not much changed except improved performance, I think
-incendiary ammunition drones explode when they run out of durability not on the first hit
-  this allows better synergy with other drone tech
-grappling hook retract momentum no longer scales with distance
-  this should give you more control
-pressing the 3rd button in factory will remove blocks resting on the second block
-  preventing an endless toggle
+new constraints
+  no health bars
+  no pause while choosing
 
-bug fixes
-  fleas no longer die early after hitting a high health target only once
-  something with super ball density calculations for tech rebound
-  grabbing a big block can make grappling hook go flying
-    added 3 potential fixes, but the bug is too rare know if it's fixed
+tech: coherence - past choices are added to all future tech
+  requires decoherence
+  research and cancel buttons have a sticky scroll positioning
+eternalism: you can't pause while choosing, but you can otherwise pause now
+  1.25->1.3 damage
+
+bugs
+  MIRV missiles now interact with time dilation properly
 
 ******************************************************** BUGS ********************************************************
 
@@ -80,33 +47,52 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
-each difficulty setting adds a chance for a random effect
-  make some effects only possible on certain levels, or with certain bosses?
-  not implemented random constraint ideas________________________
-    if player takes too long on a level
-      spawn mobs at the end of player's history
-        give a warning before they spawn
-        black holes, sneakers, bullets
-    mob death spawns something
-      bullets
-    bosses heals nearby mobs
-    ammo power ups give 0.7x ammo
-    2x energy costs
-    0.5x energy regen from all sources
-    2x research costs
-    mobs slowly regen health
-    exit door takes 10x time to open,
-      and while door is opening (ghosters, suckers) attack?
-    can't pause while choosing tech, gun, field similar to eternalism
-    can't have more then 15 bullets
-    bots do 0.5x damage
-    remove 2 random tech and return them next level
-    too niche
-      player damage is 0.25x while player is invulnerable
-      all hazards: lasers and slime do 3x damage
-      player lasers and radiation do 0.5x damage
-      explosions do 0.5x damage
-      freeze effects last 0.25x time
+procedural animation 
+  https://www.youtube.com/watch?v=qlfh_rv6khY
+
+maybe no constraints on final boss and reactor?
+
+constraints balance
+  40% JUNK chance
+  -1 choice
+  no health bars
+  4x shielded mob chance
+  +33% chance for mobs to respawn
+  2x ammo costs
+    too hard
+  0 duplication
+  power ups in stasis
+  0.1x damage after a power up
+  0.5x energy regen
+  50% max energy
+  50% max health
+  bots follow slow
+  periodically spawn WIMPs
+  mob death heals mobs
+  mobs heal for your lost health
+
+not implemented random constraint ideas________________________
+  mob death spawns something
+    mob bullets
+  bosses heals nearby mobs
+  ammo power ups give 0.7x ammo
+  2x research costs
+  mobs slowly regen health
+  exit door takes 10x time to open,
+    and while door is opening (ghosters, suckers) attack?
+  can't have more then 15 bullets
+    how to code?
+  remove 2 random tech and return them next level
+  too niche
+    player damage is 0.25x while player is invulnerable
+    all hazards: lasers and slime do 3x damage
+    player lasers and radiation do 0.5x damage
+    explosions do 0.5x damage
+    freeze effects last 0.25x time
+
+tech: ice-VII - 1.5x duration for ice-IX
+
+tech: - freezing grenades/explosions
 
 tech: - randomize constraints somehow
     in pause interface or power up selection menu?
@@ -115,27 +101,9 @@ tech: - randomize constraints somehow
 
 tech:  - when you get a bot, get a second bot
 
-tech:  - boost power ups also give 0.1x damage taken
-
-tech:  - tech have +3 choices to eject your tech
-  <eject> tech name
-    no description?
-
-copy negative-player as a boss?  or a JUNK tech?
-  code is in community map (not sure which)
-
-harpoon tech:  - after firing 4 harpoons your next harpoon has 4x damage
-  need to track number fired
-
 tech:  - after killing a Boss
   heal to full
   gain 3x damage for the rest of the level
-
-tech: clicking on this tech in the pause menu will teleport you to the next level
-
-tech:   - instead of reeling in grappling hook teleport to the hook after releasing field button
-  this might need another buff?
-    give damage immunity after teleport for 1+ seconds to balance
 
 new level - rework testChamber
 
@@ -171,9 +139,6 @@ tech: atomic pile - lose 1 health if you are above the maximum energy
   generate energy for each nearby mob?
   do damage?
   plasma torch tech?
-
-field tech: molecular assembler - every time you spawn a drone/spore/... become immune to damage for time
-  scales with how much energy was used to spawn drone/...
 
 figure out how to put instructions for controls in background on initial level
   mouse smooth makes the text position jitter when it moves sub pixels
@@ -1390,6 +1355,8 @@ possible names for tech
   cryocoolers - freezing effects
   metaphysics - maybe this changes something deep and universal about physics?  not sure
   cork - used as a heat shield for rockets
+  P = NP - something with speeding up calculation times
+  transistivity - something where a>b and b>c ->  a>c
 
 ******************************************************* DESIGN ******************************************************
 
