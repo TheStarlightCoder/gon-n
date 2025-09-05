@@ -4,11 +4,26 @@
     --hover-card-color: #e5e5ed;
 }
 
+/* * {
+    cursor: crosshair;
+} */
+
+/* override for text elements */
+/* p,
+span,
+input,
+textarea {
+    cursor: auto;
+} */
+
 body {
     font-family: "Helvetica", "Arial", sans-serif;
     margin: 0;
     overflow: hidden;
     cursor: auto;
+    /* cursor: crosshair; */
+    /* cursor: text; */
+    background-color: #f00;
     /* filter: grayscale(1); */
     /* transition: background-color 0.2s ease-in-out; */
 }
@@ -124,21 +139,45 @@ summary {
     background-color: #eee;
 }
 
+.SVG-button-splash {
+    border: 2px #333 solid;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: opacity 5s ease-in;
+}
+
+.SVG-button-splash:hover {
+    background-color: #eee;
+}
+
+#start-button {
+    position: absolute;
+    bottom: 108px;
+    right: 4px;
+    z-index: 12;
+    /* top-left | top-right | bottom-right | bottom-left */
+    /* border-radius: 8px 8px 0 0; */
+}
+
+#training-button {
+    position: absolute;
+    bottom: 56px;
+    right: 4px;
+    z-index: 12;
+    /* border-radius: 8px 0px 0 0; */
+}
+
 #experiment-button {
     position: absolute;
     bottom: 4px;
     right: 4px;
     z-index: 12;
-    transition: opacity 5s ease-in;
+    /* border-radius: 8px 0 8px 8px; */
 }
 
-#training-button {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    z-index: 12;
-    transition: opacity 5s ease-in;
-}
+
+
+
 
 #construct {
     display: none;
@@ -567,9 +606,10 @@ summary {
     position: absolute;
     bottom: 3px;
     left: 3px;
-    z-index: 12;
+    z-index: 10;
     font-size: 1.5em;
     transition: opacity 5s ease-in;
+    width: 100%;
 
     /* border: 1.5px #333 solid; */
     /* border-radius: 8px; */
@@ -721,6 +761,18 @@ summary {
     background-color: rgba(255, 255, 255, 0.4);
 }
 
+.constraint-module {
+    line-height: 160%;
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    font-family: monospace;
+    font-weight: 800;
+    text-align: center;
+    color: #624;
+    background-color: rgba(255, 240, 250, 1);
+}
+
 #right-HUD-constraint {
     position: absolute;
     top: 12px;
@@ -743,6 +795,39 @@ summary {
     transition: all 0.5s linear;
 }
 
+.constraint {
+    color: rgb(141, 23, 88);
+}
+
+.metallic-sparkle {
+    background: linear-gradient(90deg,
+            #c38aa6,
+            #e6c0d9,
+            #dca4c6,
+            #c38aa6,
+            #e6c0d9,
+            #dca4c6,
+            #c38aa6);
+    background-size: 200% 100%;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 4s infinite linear;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 #text-log {
     z-index: 2;
     position: absolute;
@@ -756,12 +841,6 @@ summary {
     background-color: rgba(255, 255, 255, 0.5);
     pointer-events: none;
     user-select: none;
-}
-
-.constraint {
-    color: rgb(141, 23, 88);
-    /* font-weight: 100; */
-    /* text-decoration: underline; */
 }
 
 .color-text {
@@ -828,6 +907,18 @@ summary {
 
 .color-ammo {
     color: #356;
+}
+
+.underline {
+    text-decoration: underline;
+    text-decoration-color: #f7b;
+    /* text-decoration-style: double; */
+    /* text-decoration-style: wavy; */
+    text-decoration-thickness: 0.16em;
+}
+
+.color-tier {
+    color: #006aff;
 }
 
 .color-choice {
@@ -950,7 +1041,9 @@ summary {
 
 .color-print {
     color: #567;
-    font-family: 'Courier New', Courier, monospace;
+    /* font-family: monospace; */
+    font-variant-caps: small-caps;
+    /* font-size: 1.3em; */
 }
 
 .color-defense {
@@ -1019,6 +1112,15 @@ summary {
     font-size: 90%;
 }
 
+.circle-grid-title {
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: -0.45em;
+    margin-top: -0.3em;
+}
+
 .circle-grid {
     width: 1.32em;
     height: 1.32em;
@@ -1028,17 +1130,19 @@ summary {
 }
 
 .circle-grid-instant {
-    width: 1.1em;
-    height: 1.1em;
+    width: 1.3em;
+    height: 1.3em;
     border-radius: 50%;
     border: 0.15em solid hsl(255, 100%, 71%);
     display: inline-block;
-    margin-bottom: -0.35em;
+    margin-bottom: -0.5em;
+    margin-top: -0.3em;
+    /* margin-bottom: -0.35em; */
 }
 
 .circle-grid-skin {
-    width: 1.25em;
-    height: 1.25em;
+    width: 1.3em;
+    height: 1.3em;
     border-radius: 50%;
     display: inline-block;
     background-color: #fff;
@@ -1437,6 +1541,11 @@ summary {
     }
 } */
 .blurry-text {
+    user-select: none;
+    filter: blur(3.5px) contrast(1.4);
+}
+
+.blur-text {
     color: transparent;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
@@ -1543,9 +1652,9 @@ summary {
 }
 
 .draw-lines4 {
-    stroke-dasharray: 300;
-    stroke-dashoffset: 300;
-    animation: dash 2.5s ease-in forwards;
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: dash 3.5s ease-in forwards;
 }
 
 
@@ -1594,7 +1703,7 @@ summary {
 }
 
 .row {
-    transition: opacity 0.4s ease-out;
+    transition: opacity 0.5s ease-out;
     /* border: 2px #444 solid; */
     /* margin-top: -2px; */
     font-size: 1.2rem;
